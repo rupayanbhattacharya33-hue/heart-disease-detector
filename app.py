@@ -166,13 +166,12 @@ def get_percentiles(input_dict):
 # ── Header ────────────────────────────────────────────────────────
 st.markdown("""
 <div style="padding:1.5rem 0 0.4rem;">
-  <div style="background:linear-gradient(135deg,#be123c,#e11d48,#9333ea);
-              -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-              font-size:2.4rem;font-weight:800;line-height:1.1;">
-    ❤️ Heart Disease Detector
+  <div style="font-size:2rem;font-weight:800;color:#be123c;line-height:1.1;">
+    Heart Disease Risk Analyser
   </div>
-  <p style="color:#6b7280;margin-top:0.4rem;font-size:0.95rem;">
-    Clinical features → XGBoost + SHAP explanation + What-If Simulator + Percentile Benchmarking
+  <p style="color:#6b7280;margin-top:0.5rem;font-size:0.92rem;max-width:600px;">
+    Enter patient clinical measurements in the panel on the left.
+    The model returns a probability score with a breakdown of which factors drove the result.
   </p>
 </div>""", unsafe_allow_html=True)
 st.divider()
@@ -181,9 +180,8 @@ st.divider()
 st.sidebar.markdown("""
 <div style="padding:0.5rem 0 1.2rem;">
   <div style="font-size:1.3rem;font-weight:800;">Patient Details</div>
-  <div style="font-size:0.82rem;opacity:0.8;margin-top:4px;">Enter clinical measurements</div>
+  <div style="font-size:0.82rem;opacity:0.8;margin-top:4px;">Enter the clinical measurements below</div>
 </div>""", unsafe_allow_html=True)
- 
 age      = st.sidebar.slider("Age (years)", 20, 80, 55)
 sex      = st.sidebar.selectbox("Sex", [1,0],
            format_func=lambda x: "Male" if x==1 else "Female")
@@ -221,7 +219,7 @@ risk_label, risk_color, risk_bg = risk_badge(live_prob)
 # ══════════════════════════════════════════════════════════════════
 # LIVE RISK METER
 # ══════════════════════════════════════════════════════════════════
-st.markdown('<div style="font-size:1.1rem;font-weight:700;color:#be123c;margin-bottom:0.8rem;">⚡ Live Risk Meter</div>', unsafe_allow_html=True)
+st.markdown('<div style="font-size:1.1rem;font-weight:700;color:#be123c;margin-bottom:0.8rem;">Live Risk Meter</div>'
  
 col_g, col_b, col_i = st.columns([1.2, 1, 1])
 with col_g:
@@ -547,13 +545,13 @@ st.divider()
 st.markdown('<div style="font-size:1.3rem;font-weight:700;margin-bottom:1rem;">📊 Model Evaluation Charts</div>', unsafe_allow_html=True)
  
 tab1,tab2,tab3,tab4,tab5,tab6,tab7 = st.tabs([
-    "📊 Correlation Heatmap",
-    "📈 ROC Curve",
-    "🔲 Confusion Matrix",
-    "🤝 Model Comparison",
-    "🔍 SHAP Importance",
-    "🎯 SHAP Direction",
-    "✅ Cross Validation",
+    "Correlation Heatmap",
+    "ROC Curve",
+    "Confusion Matrix",
+    "Model Comparison",
+    "SHAP Importance",
+    "SHAP Direction",
+    "Cross Validation",
 ])
 with tab1:
     st.image("charts/correlation_heatmap.png", width=820)
