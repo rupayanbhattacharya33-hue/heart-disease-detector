@@ -13,7 +13,6 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
-# ── CSS ───────────────────────────────────────────────────────────
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
@@ -73,8 +72,6 @@ hr { border-color: rgba(225,29,72,0.15) !important; }
     background: white !important; border-radius: 16px !important;
     border: 1px solid rgba(225,29,72,0.12) !important;
 }
-
-/* Sidebar toggle arrow — always visible */
 [data-testid="collapsedControl"] {
     display: flex !important;
     visibility: visible !important;
@@ -102,8 +99,7 @@ hr { border-color: rgba(225,29,72,0.15) !important; }
 }
 </style>
 """, unsafe_allow_html=True)
- 
-# ── Load artifacts ────────────────────────────────────────────────
+
 @st.cache_resource
 def load_artifacts():
     model        = joblib.load("models/xgb_model.pkl")
@@ -114,14 +110,13 @@ def load_artifacts():
     boundary     = joblib.load("models/boundary_clf.pkl")
     cv_scores    = joblib.load("models/cv_scores.pkl")
     return model, explainer, scaler, feat_names, full_df, boundary, cv_scores
- 
+
 model, explainer, scaler, feat_names, full_df, boundary, cv_scores = load_artifacts()
 f1_name, f2_name, clf2 = boundary
- 
+
 if "history" not in st.session_state:
     st.session_state.history = []
- 
-# ── Helpers ───────────────────────────────────────────────────────
+
 def risk_badge(prob):
     if prob < 0.35:
         return "Low Risk", "#16a34a", "#dcfce7"
@@ -129,11 +124,11 @@ def risk_badge(prob):
         return "Moderate Risk", "#d97706", "#fef3c7"
     else:
         return "High Risk", "#dc2626", "#fee2e2"
- 
+
 def chest_pain_label(cp):
     return {1:"Typical angina",2:"Atypical angina",
             3:"Non-anginal pain",4:"Asymptomatic"}[cp]
- 
+
 def draw_gauge(prob):
     fig, ax = plt.subplots(figsize=(4, 2.3), subplot_kw=dict(aspect="equal"))
     fig.patch.set_facecolor("#fff5f7")
@@ -154,7 +149,7 @@ def draw_gauge(prob):
     ax.set_xlim(-1.4, 1.4); ax.set_ylim(-0.5, 1.25); ax.axis("off")
     plt.tight_layout(pad=0)
     return fig
- 
+
 def get_percentiles(input_dict):
     out = {}
     for col, val in input_dict.items():
@@ -162,8 +157,7 @@ def get_percentiles(input_dict):
             pct = (full_df[col] < val).mean() * 100
             out[col] = round(pct, 1)
     return out
- 
-# ── Header ────────────────────────────────────────────────────────
+
 st.markdown("""
 <div style="padding:1.5rem 0 0.4rem;">
   <div style="font-size:2rem;font-weight:800;color:#be123c;line-height:1.1;">
@@ -175,8 +169,7 @@ st.markdown("""
   </p>
 </div>""", unsafe_allow_html=True)
 st.divider()
- 
-# ── Sidebar ───────────────────────────────────────────────────────
+
 st.sidebar.markdown("""
 <div style="padding:0.5rem 0 1.2rem;">
   <div style="font-size:1.3rem;font-weight:800;">Patient Details</div>
@@ -204,30 +197,31 @@ ca       = st.sidebar.selectbox("Major Vessels (0–3)", [0,1,2,3])
 thal     = st.sidebar.selectbox("Thalassemia", [3,6,7],
            format_func=lambda x: {3:"Normal",6:"Fixed defect",
                                    7:"Reversible defect"}[x])
- 
+
 st.sidebar.markdown("<br>", unsafe_allow_html=True)
 predict_clicked = st.sidebar.button("❤️ Analyse Risk", type="primary")
- 
+
 input_dict = dict(age=age, sex=sex, cp=cp, trestbps=trestbps, chol=chol,
                   fbs=fbs, restecg=restecg, thalach=thalach, exang=exang,
                   oldpeak=oldpeak, slope=slope, ca=ca, thal=thal)
 input_df = pd.DataFrame([input_dict])[feat_names]
- 
+
 live_prob = float(model.predict_proba(input_df)[0][1])
 risk_label, risk_color, risk_bg = risk_badge(live_prob)
- 
-# ══════════════════════════════════════════════════════════════════
-# LIVE RISK METER
-# ══════════════════════════════════════════════════════════════════
-st.markdown('<div style="font-size:1.1rem;font-weight:700;color:#be123c;margin-bottom:0.8rem;">Live Risk Meter</div>'
- 
+
+# ── LIVE RISK METER ──
+st.markdown(
+    '<div style="font-size:1.1rem;font-weight:700;color:#be123c;margin-bottom:0.8rem;">Live Risk Meter</div>',
+    unsafe_allow_html=True
+)
+
 col_g, col_b, col_i = st.columns([1.2, 1, 1])
 with col_g:
     st.markdown('<div style="background:white;border-radius:20px;padding:0.6rem;border:1px solid rgba(225,29,72,0.12);">', unsafe_allow_html=True)
     st.pyplot(draw_gauge(live_prob), use_container_width=True)
     plt.close()
     st.markdown("</div>", unsafe_allow_html=True)
- 
+
 with col_b:
     st.markdown(f"""
     <div style="background:white;border-radius:20px;padding:1.4rem;
@@ -240,7 +234,7 @@ with col_b:
       <div style="font-size:0.82rem;color:#9ca3af;">Age {age} · {"Male" if sex==1 else "Female"}</div>
       <div style="font-size:0.82rem;color:#9ca3af;">BP {trestbps} mmHg · Chol {chol}</div>
     </div>""", unsafe_allow_html=True)
- 
+
 with col_i:
     st.markdown(f"""
     <div style="background:white;border-radius:20px;padding:1.4rem;
@@ -254,17 +248,14 @@ with col_i:
         Vessels: <b>{ca}</b>
       </div>
     </div>""", unsafe_allow_html=True)
- 
+
 st.divider()
- 
-# ══════════════════════════════════════════════════════════════════
-# FULL PREDICTION
-# ══════════════════════════════════════════════════════════════════
+
 if predict_clicked:
     prediction = int(model.predict(input_df)[0])
     prob       = float(model.predict_proba(input_df)[0][1])
     risk_label, risk_color, risk_bg = risk_badge(prob)
- 
+
     st.session_state.history.append({
         "Risk": f"{prob:.0%}", "Verdict": risk_label,
         "Age": age, "Sex": "M" if sex==1 else "F",
@@ -272,23 +263,22 @@ if predict_clicked:
     })
     if len(st.session_state.history) > 8:
         st.session_state.history = st.session_state.history[-8:]
- 
+
     if prediction == 1:
         st.error(f"⚠️ **Heart disease likely** — model confidence: {prob:.1%}")
     else:
         st.success(f"✅ **No disease detected** — model confidence: {1-prob:.1%}")
- 
+
     c1, c2, c3, c4 = st.columns(4)
     c1.metric("Disease Probability", f"{prob:.1%}")
     c2.metric("Risk Level", risk_label)
     c3.metric("Max Heart Rate", f"{thalach} bpm")
     c4.metric("ST Depression", f"{oldpeak}")
- 
+
     st.markdown("<br>", unsafe_allow_html=True)
- 
-    # ── SHAP + Clinical bars ──────────────────────────────────────
+
     col_shap, col_bars = st.columns([1.3, 1])
- 
+
     with col_shap:
         st.markdown('<div style="font-size:1rem;font-weight:700;margin-bottom:0.4rem;">🔍 Why this prediction?</div>', unsafe_allow_html=True)
         st.markdown('<div style="font-size:0.82rem;color:#9ca3af;margin-bottom:0.7rem;">Red = raised risk · Blue = lowered risk</div>', unsafe_allow_html=True)
@@ -306,7 +296,7 @@ if predict_clicked:
         plt.tight_layout()
         st.pyplot(fig, use_container_width=True)
         plt.close(); mpl.rcdefaults()
- 
+
     with col_bars:
         st.markdown('<div style="font-size:1rem;font-weight:700;margin-bottom:0.8rem;">📊 Clinical Factors</div>', unsafe_allow_html=True)
         factors = [
@@ -330,8 +320,7 @@ if predict_clicked:
                 <div style="width:{pct}%;height:100%;background:{color};border-radius:99px;"></div>
               </div>
             </div>""", unsafe_allow_html=True)
- 
-    # Top SHAP driver
+
     shap_vals = explainer.shap_values(input_df)
     top_idx   = np.argmax(np.abs(shap_vals[0]))
     top_feat  = feat_names[top_idx]
@@ -344,15 +333,12 @@ if predict_clicked:
       <span style="font-weight:700;color:#be123c;">Key driver: </span>
       <b>{top_feat}</b> {direction} the risk score by <b>{abs(top_val):.3f}</b>.
     </div>""", unsafe_allow_html=True)
- 
+
     st.divider()
- 
-    # ══════════════════════════════════════════════════════════════
-    # FEATURE 1: PATIENT PERCENTILE CARD
-    # ══════════════════════════════════════════════════════════════
+
     st.markdown('<div style="font-size:1.2rem;font-weight:700;color:#1a1a2e;margin-bottom:0.8rem;">📍 Patient Percentile Benchmarking</div>', unsafe_allow_html=True)
     st.markdown('<div style="font-size:0.85rem;color:#9ca3af;margin-bottom:1rem;">How this patient compares to all 303 patients in the training dataset</div>', unsafe_allow_html=True)
- 
+
     percentiles = get_percentiles(input_dict)
     bench_cols  = st.columns(5)
     bench_items = [
@@ -379,23 +365,20 @@ if predict_clicked:
                         border-radius:99px;"></div>
           </div>
         </div>""", unsafe_allow_html=True)
- 
+
     st.divider()
- 
-    # ══════════════════════════════════════════════════════════════
-    # FEATURE 2: WHAT-IF RISK SIMULATOR
-    # ══════════════════════════════════════════════════════════════
+
     st.markdown('<div style="font-size:1.2rem;font-weight:700;color:#1a1a2e;margin-bottom:0.4rem;">🔮 What-If Risk Simulator</div>', unsafe_allow_html=True)
     st.markdown('<div style="font-size:0.85rem;color:#9ca3af;margin-bottom:1rem;">Adjust modifiable risk factors to see how the prediction changes</div>', unsafe_allow_html=True)
- 
+
     with st.container():
         st.markdown('<div style="background:white;border-radius:20px;padding:1.5rem;border:1px solid rgba(225,29,72,0.12);">', unsafe_allow_html=True)
- 
+
         w1, w2, w3 = st.columns(3)
         wi_chol    = w1.slider("What if Cholesterol was…",   100, 600, chol,     key="wi_chol")
         wi_thalach = w2.slider("What if Max Heart Rate was…", 70, 210, thalach,  key="wi_hr")
         wi_oldpeak = w3.slider("What if ST Depression was…",  0.0, 6.0, oldpeak, step=0.1, key="wi_op")
- 
+
         whatif_dict = input_dict.copy()
         whatif_dict["chol"]    = wi_chol
         whatif_dict["thalach"] = wi_thalach
@@ -405,15 +388,14 @@ if predict_clicked:
         delta       = whatif_prob - prob
         delta_str   = f"+{delta:.1%}" if delta > 0 else f"{delta:.1%}"
         delta_color = "#dc2626" if delta > 0 else "#16a34a"
- 
+
         wc1, wc2, wc3 = st.columns(3)
         wc1.metric("Original Risk",    f"{prob:.1%}")
         wc2.metric("Simulated Risk",   f"{whatif_prob:.1%}")
         wc3.metric("Change",           delta_str,
                    delta=delta_str,
                    delta_color="inverse")
- 
-        # Mini gauge comparison
+
         fig_cmp, axes_cmp = plt.subplots(1, 2, figsize=(7, 2.4),
                                           subplot_kw=dict(aspect="equal"))
         fig_cmp.patch.set_facecolor("#ffffff")
@@ -437,22 +419,19 @@ if predict_clicked:
         st.pyplot(fig_cmp, use_container_width=True)
         plt.close()
         st.markdown("</div>", unsafe_allow_html=True)
- 
+
     st.divider()
- 
-    # ══════════════════════════════════════════════════════════════
-    # FEATURE 3: DECISION BOUNDARY with patient dot
-    # ══════════════════════════════════════════════════════════════
+
     st.markdown(f'<div style="font-size:1.2rem;font-weight:700;margin-bottom:0.4rem;">🗺️ Where Does This Patient Fall? (Decision Boundary)</div>', unsafe_allow_html=True)
     st.markdown(f'<div style="font-size:0.85rem;color:#9ca3af;margin-bottom:1rem;">Plotted on the two most important SHAP features: <b>{f1_name}</b> vs <b>{f2_name}</b></div>', unsafe_allow_html=True)
- 
+
     fig_db, ax_db = plt.subplots(figsize=(8, 5))
     fig_db.patch.set_facecolor("#fff5f7")
     ax_db.set_facecolor("#fff5f7")
- 
+
     X2_all = full_df[[f1_name, f2_name]].values
     y_all  = full_df["target"].values
- 
+
     from sklearn.inspection import DecisionBoundaryDisplay
     DecisionBoundaryDisplay.from_estimator(
         clf2, X2_all,
@@ -461,14 +440,12 @@ if predict_clicked:
         xlabel=f1_name, ylabel=f2_name,
         alpha=0.22, ax=ax_db, cmap="RdYlGn_r"
     )
-    # All training patients
     sc = ax_db.scatter(
         X2_all[:, 0], X2_all[:, 1],
         c=y_all, cmap="RdYlGn_r",
         edgecolors="white", linewidth=0.6,
         s=45, zorder=3, alpha=0.7
     )
-    # Current patient — big star
     px = float(input_df[f1_name].values[0])
     py = float(input_df[f2_name].values[0])
     ax_db.scatter(px, py,
@@ -483,16 +460,15 @@ if predict_clicked:
     plt.tight_layout()
     st.pyplot(fig_db, use_container_width=True)
     plt.close()
- 
+
     st.divider()
- 
-    # ── Session History ───────────────────────────────────────────
+
     if len(st.session_state.history) > 1:
         st.markdown('<div style="font-size:1.1rem;font-weight:700;margin-bottom:0.8rem;">📋 Session History</div>', unsafe_allow_html=True)
- 
+
         hist_df = pd.DataFrame(st.session_state.history)
         hist_df.index = [f"Patient {i+1}" for i in range(len(hist_df))]
- 
+
         fig_h, ax_h = plt.subplots(figsize=(8, 2.5))
         fig_h.patch.set_facecolor("#fff5f7")
         ax_h.set_facecolor("#fff5f7")
@@ -519,12 +495,12 @@ if predict_clicked:
         plt.tight_layout()
         st.pyplot(fig_h, use_container_width=True)
         plt.close()
- 
+
         st.dataframe(hist_df, use_container_width=True)
         if st.button("🗑️ Clear history"):
             st.session_state.history = []
             st.rerun()
- 
+
 else:
     st.markdown("""
     <div style="background:white;border-radius:20px;padding:2.5rem;
@@ -537,13 +513,10 @@ else:
         SHAP explanation · Percentile benchmarking · What-If simulator · Decision boundary · Session history
       </div>
     </div>""", unsafe_allow_html=True)
- 
-# ══════════════════════════════════════════════════════════════════
-# MODEL EVALUATION CHARTS
-# ══════════════════════════════════════════════════════════════════
+
 st.divider()
 st.markdown('<div style="font-size:1.3rem;font-weight:700;margin-bottom:1rem;">📊 Model Evaluation Charts</div>', unsafe_allow_html=True)
- 
+
 tab1,tab2,tab3,tab4,tab5,tab6,tab7 = st.tabs([
     "Correlation Heatmap",
     "ROC Curve",
@@ -574,10 +547,9 @@ with tab6:
 with tab7:
     st.image("charts/cross_validation.png", width=750)
     st.caption("5-fold CV confirms the model generalises — μ = mean AUC, σ = standard deviation across folds.")
- 
+
 st.divider()
 st.markdown("""
 <div style="text-align:center;color:#9ca3af;font-size:0.8rem;padding-bottom:1rem;">
   Model: XGBoost · Dataset: UCI Cleveland · Explainability: SHAP · Not a substitute for medical advice.
 </div>""", unsafe_allow_html=True)
- 
