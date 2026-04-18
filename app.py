@@ -10,9 +10,9 @@ import joblib
 st.set_page_config(
     page_title="Heart Disease Detector",
     page_icon="❤️",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
- 
 # ── CSS ───────────────────────────────────────────────────────────
 st.markdown("""
 <style>
@@ -72,6 +72,33 @@ hr { border-color: rgba(225,29,72,0.15) !important; }
 [data-testid="stExpander"] {
     background: white !important; border-radius: 16px !important;
     border: 1px solid rgba(225,29,72,0.12) !important;
+}
+
+/* Sidebar toggle arrow — always visible */
+[data-testid="collapsedControl"] {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    background: linear-gradient(135deg, #be123c, #e11d48) !important;
+    border-radius: 0 12px 12px 0 !important;
+    width: 36px !important;
+    height: 56px !important;
+    align-items: center !important;
+    justify-content: center !important;
+    top: 50% !important;
+    box-shadow: 4px 0 16px rgba(190,18,60,0.35) !important;
+    cursor: pointer !important;
+    z-index: 999 !important;
+}
+[data-testid="collapsedControl"] svg {
+    fill: white !important;
+    width: 20px !important;
+    height: 20px !important;
+}
+[data-testid="collapsedControl"]:hover {
+    background: linear-gradient(135deg, #9333ea, #be123c) !important;
+    box-shadow: 4px 0 24px rgba(147,51,234,0.45) !important;
+    transform: scale(1.05) !important;
 }
 </style>
 """, unsafe_allow_html=True)
