@@ -359,6 +359,17 @@ st.markdown("""
     percentile benchmarking, a What-If simulator, and a downloadable PDF report.
   </p>
 </div>""", unsafe_allow_html=True)
+ 
+# ── Download last report button — always visible at top ──────────
+if "last_report" in st.session_state:
+    st.download_button(
+        label="📄 Download Last Report (HTML)",
+        data=st.session_state["last_report"][0],
+        file_name=st.session_state["last_report"][1],
+        mime="text/html",
+        help="Open in any browser. Print → Save as PDF if you need a PDF."
+    )
+ 
 st.divider()
  
 # ══════════════════════════════════════════════════════════════════
@@ -388,7 +399,7 @@ thal     = st.sidebar.selectbox("Thalassemia", [3,6,7],
            format_func=lambda x: {3:"Normal",6:"Fixed defect",7:"Reversible defect"}[x])
  
 st.sidebar.markdown("<br>", unsafe_allow_html=True)
-predict_clicked = st.sidebar.button("Analyse Risk", type="primary")
+predict_clicked = st.sidebar.button("❤️ Analyse Risk", type="primary")
  
 input_dict = dict(age=age, sex=sex, cp=cp, trestbps=trestbps, chol=chol,
                   fbs=fbs, restecg=restecg, thalach=thalach, exang=exang,
@@ -742,8 +753,9 @@ if predict_clicked:
         input_dict, prob, risk_label, shap_vals,
         lime_fig, percentiles, similar_df
     )
+    st.session_state["last_report"] = (report_bytes, report_filename)
     st.download_button(
-        label="Download Report (HTML)",
+        label="📄 Download Report (HTML)",
         data=report_bytes,
         file_name=report_filename,
         mime="text/html",
@@ -843,10 +855,3 @@ st.markdown("""
   Explainability: SHAP TreeExplainer + LIME &nbsp;·&nbsp;
   This tool is for educational purposes only and is not a substitute for clinical diagnosis.
 </div>""", unsafe_allow_html=True)
- 
-
-
-
-
-
-
