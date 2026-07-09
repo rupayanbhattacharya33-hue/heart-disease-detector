@@ -399,7 +399,7 @@ thal     = st.sidebar.selectbox("Thalassemia", [3,6,7],
            format_func=lambda x: {3:"Normal",6:"Fixed defect",7:"Reversible defect"}[x])
  
 st.sidebar.markdown("<br>", unsafe_allow_html=True)
-predict_clicked = st.sidebar.button("❤️ Analyse Risk", type="primary")
+predict_clicked = st.sidebar.button(" 🫀  Analyse Risk", type="primary")
  
 input_dict = dict(age=age, sex=sex, cp=cp, trestbps=trestbps, chol=chol,
                   fbs=fbs, restecg=restecg, thalach=thalach, exang=exang,
